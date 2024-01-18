@@ -1,37 +1,292 @@
-package main
+package server
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"image"
+	"image/jpeg"
 	"net"
+	"os"
+	"strings"
 	"sync"
+	"bytes"
 )
 
-type Connection struct {
-	ID int
-	// 添加其他必要的连接信息
+type Request struct {
+	Image        string `json:"image"`
+	IntParameter int    `json:"intParameter"`
 }
 
+type Connection struct {
+	Conn net.Conn
+}
+
+type Environment struct {
+	activeConnections int
+	maxConnections    int
+	connectionMutex   sync.Mutex
+}
+
+func NewEnvironment(MaxConnections int) *Environment {
+	return &Environment{
+		maxConnections: MaxConnections,
+	}
+}
+
+func (e *Environment) createConnection(conn net.Conn) (*Connection, error) {
+	e.connectionMutex.Lock()
+	defer e.connectionMutex.Unlock()
+
+	if e.activeConnections >= e.maxConnections {
+		return nil, fmt.Errorf("exceeded maximum allowed connections")
+	}
+
+	// 更新活跃连接数
+	e.activeConnections++
+
+	return &Connection{Conn: conn}, nil
+}
+
+func (e *Environment) closeConnection(connection *Connection) {
+	e.connectionMutex.Lock()
+	defer e.connectionMutex.Unlock()
+
+	// 关闭连接
+	connection.Conn.Close()
+
+	// 更新活跃连接数
+	e.activeConnections--
+}
+
+
+
+// 解码客户端发送的图像数据,返回jpg格式的图像数据和int参数
+func decode_image(conn net.Conn) (image.Image, int) {
+	defer conn.Close()
+
+	// 读取客户端发送的数据
+	buffer := make([]byte, 1024)
+	var data []byte
+    
+	for {
+        n, err := conn.Read(buffer)
+        if err != nil {
+            fmt.Println("Error reading data:", err)
+            return nil, 0
+        }
+
+        data = append(data, buffer[:n]...)
+
+        if n < len(buffer) {
+            break
+        }
+    }
+
+	// 解码 JSON 数据
+	var request Request
+	err := json.Unmarshal(data, &request) //intParameter在这里以及保存在request中
+	if err != nil {
+		fmt.Println("Error decoding JSON:", err)
+		return nil, 0
+	}
+
+	// 将 base64 字符串解码为图像数据
+	imageData, err := base64.StdEncoding.DecodeString(request.Image)
+	if err != nil {
+		fmt.Println("Error decoding base64:", err)
+		return nil, 0
+	}
+
+	fmt.Println("Image data received from client.")
+
+	// 创建一个 image.Image 对象
+	img, _, err := image.Decode(strings.NewReader(string(imageData)))
+	if err != nil {
+		fmt.Println("Error decoding image:", err)
+		return nil, 0
+	}
+
+	// 将 image.Image 对象保存为 JPG 格式的文件
+	err = saveAsJPG(img, "output.jpg", 100) // 第三个参数是 JPG 压缩质量，范围从 0 到 100
+	if err != nil {
+		fmt.Println("Error saving image as JPG:", err)
+		return nil, 0
+	}
+
+	fmt.Println("Image saved as JPG.")
+
+	return img, request.IntParameter
+}
+
+// 将 image.Image 对象保存为 JPG 格式的文件
+func saveAsJPG(img image.Image, filename string, quality int) error {
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	options := &jpeg.Options{
+		Quality: quality,
+	}
+
+	err = jpeg.Encode(file, img, options)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func encode_image(image_jpg image.Image) (string,error){ // 将图像数据编码为 base64 字符串
+	var buf bytes.Buffer
+
+	// 将图片编码为 JPG 格式
+	err := jpeg.Encode(&buf, image_jpg, nil)
+	if err != nil {
+		return "", err
+	}
+
+	// 将编码后的字节切片转为 base64 编码的字符串
+	base64String := base64.StdEncoding.EncodeToString(buf.Bytes())
+
+	return base64String, nil
+}
+	
+	
+
+
+func image_process(image_jpg image.Image, index int) image.Image { // 图像处理函数
+	var wg sync.WaitGroup
+
+	ch := make(chan image.Image)
+	var n int // n 是图片处理需要的总步数，后面改
+
+	// 循环创建goroutine
+	for i := 1; i <= n; i++ {
+		wg.Add(1)
+		go func(step int) {
+			defer wg.Done()
+			result := processStep(step, index, image_jpg)
+			ch <- result
+		}(i)
+	}
+
+	// 初始化第一个输入并开始循环
+
+	ch <- image_jpg
+
+	// 等待所有 goroutine 执行完毕
+	wg.Wait()
+
+	// 最终结果
+	finalResult := <-ch
+
+	return finalResult
+}
+
+func processStep(step, input int, input_jpg image.Image) image.Image {
+	switch step {
+	case 1:
+		//第一步的函数
+	case 2:
+		//第二步
+	case 3:
+
+	case 4:
+
+		//总共n种情况
+	default:
+		return nil
+	}
+}
+
+
+func handleConnection(conn net.Conn) { // 处理连接
+
+	image_jpg, index := decode_image(conn) // 解码客户端发送的图像数据
+
+	image_end := image_process(image_jpg, index) // 图像处理函数
+
+	image_strings,err:=encode_image(image_end) // 将图像数据编码为 base64 字符串
+
+	if err != nil {
+		fmt.Println("Error encoding image:", err)
+		return
+	}
+
+	conn.Write([]byte(image_strings)) // 将图像数据发送给客户端
+}
+
+func main() {
+	//  创建一个环境结构体，最多可以容纳10个连接
+	env := NewEnvironment(5)
+	
+	listener, err := net.Listen("tcp", ":8080") //监听8080端口
+	if err != nil {
+		fmt.Println("Error listening:", err)
+		return
+	}
+	defer listener.Close()
+
+	
+
+	fmt.Println("Server listening on :8080")
+
+	for {
+
+		conn, err := listener.Accept()
+		if err != nil {
+			fmt.Println("Error accepting connection:", err)
+			continue
+		}
+        
+		connection, err := env.createConnection(conn) // 创建连接
+		if err != nil {
+			fmt.Println("Error creating connection:", err)
+			return
+		}
+        defer env.closeConnection(connection) // 关闭连接
+
+		// 在处理连接的过程中，将 Connection 对象传递给其他函数
+		handleConnection(connection.Conn)
+
+	}
+}
+
+
+
+
+
+/*
 type Environment struct { // 环境结构体，为了限制连接池的大小
 	pool    *sync.Pool
 	maxSize int
 	mu      sync.Mutex
 }
 
-func NewEnvironment(maxSize int) *Environment { // 创建环境结构体
-	return &Environment{
-		pool:    &sync.Pool{},
-		maxSize: maxSize,
-	}
+type Connection struct { // 连接结构体
+	conn net.Conn
 }
 
-func (e *Environment) getConnection() *Connection { // 获取连接
-	e.mu.Lock()        //执行函数时加锁，。为了保证在多个goroutine中不会出现竞争条件
+func NewEnvironment(Maxsize int) *Environment {   
+    return &Environment{
+        pool: &sync.Pool{
+            New: func() interface{} {
+                return &Connection{conn: nil}
+            },
+        },
+        maxSize: Maxsize,
+    }
+}
+
+
+func (e *Environment) getConnection() *Connection { // 从连接池中获取连接
+	e.mu.Lock() //执行函数时加锁，为了保证在多个goroutine中不会出现竞争条件
 	defer e.mu.Unlock()
 
 	conn := e.pool.Get() //从连接池中获取连接
-	if conn == nil {
-		return &Connection{ID: 1}
-	}
 	return conn.(*Connection) //将interface{}类型转换为*Connection类型
 }
 
@@ -45,40 +300,4 @@ func (e *Environment) releaseConnection(conn *Connection) { // 表示这个函�
 
 	e.pool.Put(conn)
 }
-
-func handleConnection(env *Environment, conn net.Conn) {
-	defer conn.Close()
-
-	connection := env.getConnection()
-	defer env.releaseConnection(connection)
-
-	fmt.Printf("Handling connection %d\n", connection.ID)
-	// 加入处理连接的代码
-}
-
-func main() {
-
-	listener, err := net.Listen("tcp", ":8080") //监听8080端口
-	if err != nil {
-		fmt.Println("Error listening:", err)
-		return
-	}
-	defer listener.Close()
-
-	//  创建一个环境结构体，最多可以容纳10个连接
-	env := NewEnvironment(10)
-
-	fmt.Println("Server listening on :8080")
-
-	for {
-
-		conn, err := listener.Accept()
-		if err != nil {
-			fmt.Println("Error accepting connection:", err)
-			continue
-		}
-
-		// 为每个连接启动一个goroutine
-		go handleConnection(env, conn)
-	}
-}
+*/
