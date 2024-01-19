@@ -49,6 +49,7 @@ func Decode_image(conn net.Conn) (image.Image, int) {
 		return nil, 0
 	}
 
+
 	// 将 base64 字符串解码为图像数据
 	imageData, err := base64.StdEncoding.DecodeString(request.Image)
 	if err != nil {
@@ -112,3 +113,18 @@ func Encode_image(image_jpg image.Image) (string,error){ // 将图像数据编�
 	return base64String, nil
 }
 	
+
+func LoadImage(imagePath string) (image.Image, error) {
+	file, err := os.Open(imagePath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	img, _, err := image.Decode(file)
+	if err != nil {
+		return nil, err
+	}
+
+	return img, nil
+}
