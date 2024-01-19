@@ -184,49 +184,5 @@ func abs(x uint8) uint8 {
 }
 
 
-/*
-func main(){
-  
-	var wg sync.WaitGroup
-	ch := make(chan int)
-        var n int  // n 是图片处理需要的总步数，后面改
-	// 循环创建goroutine
-	for i := 1; i <= n; i++ {
-		wg.Add(1)
-		go func(step int) {
-			defer wg.Done()
-			input := <-ch
-			result := processStep(step, input)
-			ch <- result
-		}(i)
-	}
-
-	// 初始化第一个输入并开始循环
-	ch <- ？
-
-	// 等待所有 goroutine 执行完毕
-	wg.Wait()
-
-	// 最终结果
-	finalResult := <-ch
-}
-
-func processStep(step, input int) int {
-	switch step {
-	case 1:
-		//第一步的函数
-	case 2:
-		//第二步
-	case 3:
-	
-	case 4:
-
-	//总共n种情况
-  	default:
-		return input
-	}
-}
 
 
-}        pzx写
-*/    
