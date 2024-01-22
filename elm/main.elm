@@ -9,6 +9,7 @@ import Array exposing (..)
 import Dict exposing (Dict)
 import Json.Decode exposing (Decoder, map4, map2, field, int, string, list, decodeString)
 
+---main---
 main =
     Browser.element {init = init, update = update,view = view, subscriptions = \_ -> Sub.none}
 
@@ -24,6 +25,7 @@ type alias Meaning =
     , definitions : (List String)
     }
 
+---init---
 init_Model : Model
 init_Model =
     { toGuess = ""
@@ -86,7 +88,7 @@ type Msg
     | GotQuote (Result Http.Error (List (List Meaning)))
     | NewPuzzle
 
-
+---update---
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
@@ -100,7 +102,8 @@ update msg model =
             ({ model | answer = [] }, Cmd.none)
         NewPuzzle ->
             (init_Model, getRandom)
-            
+
+---view---
 view model =
     div []
         [ h1 [] [ text "Guess the word" ]
