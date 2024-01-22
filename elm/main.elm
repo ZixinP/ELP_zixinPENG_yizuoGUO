@@ -79,10 +79,12 @@ meaningDecoder =
 definitionDecoder : Decoder String
 definitionDecoder = 
     (field "definition" string)
+
 type Msg
     = Guess String
     | Randint Int
     | GotQuote (Result Http.Error (List (List Meaning)))
+    | NewPuzzle
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -96,6 +98,8 @@ update msg model =
             ({ model | answer = quote }, Cmd.none)
         GotQuote (Err _) ->
             ({ model | answer = [] }, Cmd.none)
+        NewPuzzle ->
+            (init_Model, getRandom)
             
 view model =
     div []
@@ -103,4 +107,5 @@ view model =
         , div [] [ text model.toGuess ]
         , input [ onInput Guess ] []
         , div [] [ text model.guessed ]
+        , button [ onClick NewPuzzle ] [ text "new puzzle" ]
         ]            
