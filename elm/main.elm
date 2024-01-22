@@ -16,16 +16,19 @@ wordsPool = "a anywhere below burn climb able apartment bend bus close about app
 type alias Model =
     { toGuess : String
     , guessed : String
-    , answer : String
-    , meanings : List (List String)
+    , answer : List (List Meaning)
+    }
+
+type alias Meaning = 
+    { partOfSpeech : String
+    , definitions : (List String)
     }
 
 init_Model : Model
 init_Model =
     { toGuess = ""
     , guessed = ""
-    , answer = ""
-    , meanings = []
+    , answer = []
     }
 
 init : () -> (Model, Cmd Msg)
@@ -46,10 +49,40 @@ getWord words nbr =
         newword = Array.get nbr wordarray
     in
         Maybe.withDefault "no word" newword
+        
+getDefinitions : String -> Cmd Msg
+getDefinitions word = 
+    Http.get
+        { url = "https://api.dictionaryapi.dev/api/v2/entries/en/" ++ (word)
+        , expect = Http.expectJson GotQuote quoteDecoder
+        }
 
+--decode the json response
+quoteDecoder : Decoder (List (List Meaning))
+quoteDecoder =
+    (Json.Decode.list typeMeaningsDecoder)
+    
+typeMeaningsDecoder : Decoder (List Meaning)
+typeMeaningsDecoder = 
+    (field "meanings" listMeaningDecoder)
+
+listMeaningDecoder : Decoder (List Meaning)
+listMeaningDecoder = 
+    Json.Decode.list meaningDecoder
+    
+meaningDecoder : Decoder Meaning
+meaningDecoder = 
+    map2 Meaning
+        (field "partOfSpeech" string)
+        (field "definitions" (Json.Decode.list definitionDecoder))
+    
+definitionDecoder : Decoder String
+definitionDecoder = 
+    (field "definition" string)
 type Msg
     = Guess String
     | Randint Int
+    | GotQuote (Result Http.Error (List (List Meaning)))
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -59,7 +92,10 @@ update msg model =
             ({ model | guessed = str }, Cmd.none)
         Randint nbr ->
             ({ model | toGuess = getWord wordsPool nbr }, Cmd.none)
-            
+        GotQuote (Ok quote) ->
+            ({ model | answer = quote }, Cmd.none)
+        GotQuote (Err _) ->
+            ({ model | answer = [] }, Cmd.none)
             
 view model =
     div []
