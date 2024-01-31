@@ -1,32 +1,45 @@
-//https://github.com/sfrenot/javascript/tree/master/projet2
+//适用于node.js的jarnac游戏
 
-function createtable(container) {
 
-    var tableContainer = document.getElementById(container);
-    var table = document.createElement("table");
-    table.style.borderCollapse = "collapse";
-    table.style.width = "300px";
-    table.style.height = "300px";
-  
-    for (var row = 1; row < 10; row++) {
-      var tr = document.createElement("tr");
-  
-      for (var col = 1; col < 10; col++) {
-        var td = document.createElement("td");
-        td.style.border = "1px solid #000";
-        td.style.width = "30px";
-        td.style.height = "30px";
-        //td.style.textAlign = "center";
-        //td.style.verticalAlign = "middle";
-        //td.appendChild(document.createTextNode(row * col));
-        tr.appendChild(td);
-      }
-      table.appendChild(tr);
+
+
+//适用于node.js的jarnac游戏
+
+const letter_pool = {"A":14,"B":4,"C":7,"D":5,"E":19,"F":2,"G":4,"H":2,"I":11,"J":1,"K":1,"L":6,"M":5,"N":9,"O":8,"P":4,"Q":1,"R":10,"S":7,"T":9,"U":8,"V":2,"W":1,"X":1,"Y":1,"Z":2};
+var letter_left = letter_pool;
+// var init = false;
+
+function get_random_letters(init) {
+  const letters = Object.keys(letter_left);
+  const random_letters = [];
+  var nb_letters = 1;
+  if (init) { nb_letters = 6; } 
+
+  for (let i = 0; i < nb_letters ; i++) {
+    let letter = '';
+    
+    while (letter === '' || letter_left[letter] === 0) {
+      const random_index = Math.floor(Math.random() * letters.length);
+      letter = letters[random_index];
     }
-    tableContainer.appendChild(table);
-  
+    
+    random_letters.push(letter);
+    letter_left[letter]--;
   }
-  window.onload = function() {
-    createtable("TableContainer");
-    createtable("TableContainer2");
-  };
+  
+  return random_letters;
+}
+
+
+// function for test: count the number of letters left
+function count_letters_left() {
+  let count = 0;
+  for (let letter in letter_left) {
+    count += letter_left[letter];
+  }
+  return count;
+}
+for (let i = 0; i < 5; i++) {
+  console.log(count_letters_left());
+  console.log(get_random_letters());
+}
