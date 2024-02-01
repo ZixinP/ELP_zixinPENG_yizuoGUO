@@ -36,10 +36,10 @@ function count_letters_left() {
   return count;
 }
 
-for (let i = 0; i < 5; i++) {
-  console.log(count_letters_left());
-  console.log(get_random_letters());
-}
+// for (let i = 0; i < 5; i++) {
+//   console.log(count_letters_left());
+//   console.log(get_random_letters());
+// }
 
 
 
@@ -49,7 +49,58 @@ let player1 = {
   words_played : []
 }
 let player2 = {
-  plate : [[],[],[],[],[],[],[],[]],
+  plate : [[[],[],[],[],[],[],[],[],[]],
+           [[],[],[],[],[],[],[],[],[]],
+           [[],[],[],[],[],[],[],[],[]],
+           [[],[],[],[],[],[],[],[],[]],
+           [[],[],[],[],[],[],[],[],[]],
+           [[],[],[],[],[],[],[],[],[]],
+           [[],[],[],[],[],[],[],[],[]],
+           [[],[],[],[],[],[],[],[],[]]
+          ],
   hand : [],
   words_played : []
 }
+
+function letter_aimed(type){
+  if (type === 'put') {
+    let letter = prompt('choose a letter to put:');
+    if (player1.hand.includes(letter)) {
+      return letter;
+    } else {
+      console.log('you do not have this letter in your hand, try again');
+      return letter_aimed('put');
+    }
+  }
+  else if (type === 'exchange') {
+    return [letter_aimed('put'),letter_aimed('put'),letter_aimed('put')];
+  }
+}
+
+function put_letter(letter, player, x, y) {
+  x = parseInt(x);
+  y = parseInt(y);
+  if (Array.isArray(player.plate[x][y]) && player.plate[x][y].length > 0) {
+    console.log('this cell is already occupied,tried another one');
+    let newLetter = prompt('letter:');
+    let newX = parseInt(prompt('x:'));
+    let newY = parseInt(prompt('y:'));
+    put_letter(newLetter, player, newX, newY);
+  } else {
+    player.plate[x][y] = [letter];
+  }
+}
+
+function display_plate(player) {
+  for (let row of player.plate) {
+    let rowStr = '';
+    for (let cell of row) {
+      rowStr += (Array.isArray(cell) && cell.length === 0) ? ' [ ] ' :  ' ['+cell+'] ';
+    }
+    console.log(rowStr);
+  }
+}
+put_letter('A', player2, 0, 0);
+display_plate(player2);
+put_letter('B', player2, 0, 0);
+display_plate(player2);
