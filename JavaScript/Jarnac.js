@@ -35,14 +35,14 @@ function get_random_letters(init) {
 /*
  * change the letters chosen with the bag, no return
  */
-function exchange_with_bag(player, letters, letters_left) {
+function exchange_with_bag(player, letters) {
   for (let letter of letters) {
     player.hand.push(get_random_letters(false)[0]);
     if (letters_left[letter] === undefined) {
-      letters_left[letter] = 0;
+        letters_left[letter] = 0;
     }
     letters_left[letter]++;
-  }
+  } 
 }
 
 /*
@@ -63,10 +63,10 @@ function get_aimed_row(player) {
       }
       console.log('you try to put a letter in an empty row, you have to fill the row from the top');
       console.log('please choose at least 3 letters in your hand to put in this row');
-      return [1, aime];
+      return [2, aime];
     } else {
       console.log('you try to put a letter in a row with letters, please choose a letter in your hand to put in this row');
-      return [2, x];
+      return [1, x];
     }
   }
 }
@@ -77,7 +77,7 @@ function get_aimed_row(player) {
  * return: a letter or an array of three letters
  */
 function get_aimed_letter(player, type) {
-  if (type === '2') {
+  if (type === '1') {
     let letter = prompt('choose a letter: ');
     if (player.hand.includes(letter)) {
       const index = player.hand.indexOf(letter);
@@ -85,16 +85,16 @@ function get_aimed_letter(player, type) {
       return letter;
     } else {
       console.log('you do not have this letter in your hand, try again');
-      return get_aimed_letter(player, 'put');
+      return get_aimed_letter(player, '1');
     }
   }
-  else if (type === '1') {
+  else if (type === '2') {
     console.log('choose 3 letters to put');
-    return [get_aimed_letter(player, 'put'), get_aimed_letter(player, 'put'), get_aimed_letter(player, 'put')];
+    return [get_aimed_letter(player, '1'), get_aimed_letter(player, '1'), get_aimed_letter(player, '1')];
   }
   else if (type === 'exchange') {
     console.log('choose 3 letters to exchange');
-    return [get_aimed_letter(player, 'put'), get_aimed_letter(player, 'put'), get_aimed_letter(player, 'put')];
+    return [get_aimed_letter(player, '1'), get_aimed_letter(player, '1'), get_aimed_letter(player, '1')];
   }
 }
 
@@ -105,7 +105,7 @@ function get_aimed_letter(player, type) {
 function rearrange_letters(letters) {
   let arranged_letters = [];
   console.log('enter all the letters in the row by your order: ', letters);
-  while (letters.length > 0) {
+  while (letters != []) {
     let letter = prompt('letter: ');
     const index = letters.indexOf(letter);
     if (index !== -1) {
