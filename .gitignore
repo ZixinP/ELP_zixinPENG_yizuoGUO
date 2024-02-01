@@ -1,2 +1,4 @@
 *.jpg
 go.work
+node_modules
+*.json

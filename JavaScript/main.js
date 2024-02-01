@@ -62,7 +62,7 @@ while (!end) {
     let play_type = res[0];
     let row = res[1];
     let letters = game.get_aimed_letter(player,play_type);
-    console.log(typeof(letters))
+    console.log('you chose:', letters)
     let word = game.rearrange_letters(letters);
     while (!game.verify_word(word)) {
         console.log('Invalid word. Please try again.');

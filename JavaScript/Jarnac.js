@@ -58,7 +58,7 @@ function get_aimed_row(player) {
   } else {
     if (player.plate[x][0].length === 0) {
       let aime = x;
-      for (let i = x; i > 0; i--) {
+      for (let i = x; i >= 0; i--) {
         if (player.plate[i][0].length === 0) { aime = i; }
       }
       console.log('you try to put a letter in an empty row, you have to fill the row from the top');
@@ -77,7 +77,7 @@ function get_aimed_row(player) {
  * return: a letter or an array of three letters
  */
 function get_aimed_letter(player, type) {
-  if (type === '1') {
+  if (type === 1) {
     let letter = prompt('choose a letter: ');
     if (player.hand.includes(letter)) {
       const index = player.hand.indexOf(letter);
@@ -85,16 +85,16 @@ function get_aimed_letter(player, type) {
       return letter;
     } else {
       console.log('you do not have this letter in your hand, try again');
-      return get_aimed_letter(player, '1');
+      return get_aimed_letter(player, 1);
     }
   }
-  else if (type === '2') {
+  else if (type === 2) {
     console.log('choose 3 letters to put');
-    return [get_aimed_letter(player, '1'), get_aimed_letter(player, '1'), get_aimed_letter(player, '1')];
+    return [get_aimed_letter(player, 1), get_aimed_letter(player, 1), get_aimed_letter(player, 1)];
   }
   else if (type === 'exchange') {
     console.log('choose 3 letters to exchange');
-    return [get_aimed_letter(player, '1'), get_aimed_letter(player, '1'), get_aimed_letter(player, '1')];
+    return [get_aimed_letter(player, 1), get_aimed_letter(player, 1), get_aimed_letter(player, 1)];
   }
 }
 
