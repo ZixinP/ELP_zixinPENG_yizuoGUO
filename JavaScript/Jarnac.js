@@ -1,5 +1,5 @@
 const prompt = require('prompt-sync')();
-var words = require('an-array-of-french-words')
+var words = require('an-array-of-french-words').map(word => word.toUpperCase());
 /*https://github.com/words/an-array-of-english-words*/
 
 const letter_pool = {"A":14,"B":4,"C":7,"D":5,"E":19,"F":2,"G":4,"H":2,"I":11,"J":1,"K":1,"L":6,"M":5,"N":9,"O":8,"P":4,"Q":1,"R":10,"S":7,"T":9,"U":8,"V":2,"W":1,"X":1,"Y":1,"Z":2};
@@ -34,6 +34,7 @@ function get_random_letters(init) {
 
 // need to seperate to a main js file
 let player1 = {
+  name : 'player1',
   plate : [[[],[],[],[],[],[],[],[],[]],
            [[],[],[],[],[],[],[],[],[]],
            [[],[],[],[],[],[],[],[],[]],
@@ -46,6 +47,7 @@ let player1 = {
   words_played : []
 }
 let player2 = {
+  name : 'player2',
   plate : [[['M'],['O'],['M'],[],[],[],[],[],[]],
            [['D'],['A'],['D'],[],[],[],[],[],[]],
            [[],[],[],[],[],[],[],[],[]],
@@ -143,33 +145,41 @@ function rearrange_letters(letters) {
   }
   return arranged_letters;
 }
-console.log(rearrange_letters(['A','B','C','D','E','F']));
 
 /*
  * check if the word is valid, return true or false
+ * ! problem with the accent
  */
-function verify_word(word) {
-}
-
-
-
-
-
-function put_letter(letter, player, x, y) {
-  x = parseInt(x);
-  y = parseInt(y);
-  if (Array.isArray(player.plate[x][y]) && player.plate[x][y].length > 0) {
-    console.log('this cell is already occupied,tried another one');
-    let newLetter = prompt('letter: ');
-    let newX = parseInt(prompt('x: '));
-    let newY = parseInt(prompt('y: '));
-    put_letter(newLetter, player, newX, newY);
+function verify_word(letters) {
+  let word = letters.join('');
+  if (words.includes(word)) {
+    return true;
   } else {
-    player.plate[x][y] = [letter];
+    return false;
   }
 }
 
 
+/**
+ * put the verified word in the plate so there is no verification here
+ * @param {*} player 
+ * @param {*} word verified word
+ * @param {*} x row number
+ */
+function put_word(player, word, x) {
+  let row = player.plate[x];
+  let i = 0;
+  for (let letter of word) {
+    row[i].push(letter);
+    i++;
+  }
+  player.words_played.push(word);
+}
+
+/*
+ * display the plate of the player
+ * return: nothing
+ */
 function display_plate(player) {
   for (let row of player.plate) {
     let rowStr = '';
@@ -179,3 +189,12 @@ function display_plate(player) {
     console.log(rowStr);
   }
 }
+
+/*
+ * display the hand of the player
+ * return: nothing
+ */
+function display_hand(player) {
+  console.log('hand of player ', player.name, ': ', player.hand);
+}
+display_hand(player1);
