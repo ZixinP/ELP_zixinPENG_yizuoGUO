@@ -1,18 +1,14 @@
 //适用于node.js的jarnac游戏
-
-
-
-
-//适用于node.js的jarnac游戏
+const prompt = require('prompt-sync')();
 
 const letter_pool = {"A":14,"B":4,"C":7,"D":5,"E":19,"F":2,"G":4,"H":2,"I":11,"J":1,"K":1,"L":6,"M":5,"N":9,"O":8,"P":4,"Q":1,"R":10,"S":7,"T":9,"U":8,"V":2,"W":1,"X":1,"Y":1,"Z":2};
-var letter_left = letter_pool;
+let letter_left = letter_pool;
 // var init = false;
 
 function get_random_letters(init) {
   const letters = Object.keys(letter_left);
   const random_letters = [];
-  var nb_letters = 1;
+  let nb_letters = 1;
   if (init) { nb_letters = 6; } 
 
   for (let i = 0; i < nb_letters ; i++) {
@@ -39,7 +35,21 @@ function count_letters_left() {
   }
   return count;
 }
+
 for (let i = 0; i < 5; i++) {
   console.log(count_letters_left());
   console.log(get_random_letters());
+}
+
+
+
+let player1 = {
+  plate : [[],[],[],[],[],[],[],[]],
+  hand : [],
+  words_played : []
+}
+let player2 = {
+  plate : [[],[],[],[],[],[],[],[]],
+  hand : [],
+  words_played : []
 }
