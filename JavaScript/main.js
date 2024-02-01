@@ -1,6 +1,7 @@
 const prompt = require('prompt-sync')();
 var game = require('./Jarnac.js');
-
+var turn = 1;
+var end = false;
 
 console.log('Welcome to Jarnac');
 let player1 = {
@@ -13,7 +14,7 @@ let player1 = {
              [[],[],[],[],[],[],[],[],[]],
              [[],[],[],[],[],[],[],[],[]],
              [[],[],[],[],[],[],[],[],[]]],
-    hand : [],
+    hand : [game.get_random_letters(true)],
     words_played : []
     };
 let player2 = {
@@ -26,6 +27,14 @@ let player2 = {
              [[],[],[],[],[],[],[],[],[]],
              [[],[],[],[],[],[],[],[],[]],
              [[],[],[],[],[],[],[],[],[]]],
-    hand : [],
+    hand : [game.get_random_letters(true)],
     words_played : []
     }
+let players = [player1, player2];
+console.log('Game start');
+while (!end) {
+    console.log('Turn of player' + turn);
+    let player = players[turn - 1];
+    game.display_plate(player);
+    game.display_hand(player);
+}
