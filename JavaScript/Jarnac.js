@@ -52,18 +52,10 @@ function exchange_with_bag(player, letters) {
 function get_aimed_row(player) {
   console.log('choose a row (0-7) to put the letter');
   let x = prompt('x: ');
-  if (x === '^C') {
-    console.log('Exit');
-    process.exit();
-  }
   x = parseInt(x);
   while (x === NaN) {
     console.log('Invalid input. Please try again.');
     x = prompt('x: ');
-    if (x === '^C') {
-      console.log('Exit');
-      process.exit();
-    }
     x = parseInt(x);
   }
   if (x < 0 || x > 7) {
@@ -93,10 +85,6 @@ function get_aimed_row(player) {
 function get_aimed_letter(player, type) {
   if (type === 1) {
     let letter = prompt('choose a letter: ');
-    if (letter === '^C') {
-      console.log('Exit');
-      process.exit();
-    }
     if (player.hand.includes(letter)) {
       const index = player.hand.indexOf(letter);
       player.hand.splice(index, 1);
@@ -126,10 +114,6 @@ function rearrange_letters(letters) {
   while (letters.length > 0) {
     let letter = prompt('letter: ');
     const index = letters.indexOf(letter);
-    if (letter === '^C') {
-      console.log('Exit');
-      process.exit();
-    }
     if (index !== -1) {
       letters.splice(index, 1);
       arranged_letters.push(letter);
