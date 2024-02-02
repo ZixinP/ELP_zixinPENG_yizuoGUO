@@ -109,11 +109,12 @@ async function get_aimed_letter(player, type) {
         }
     } else if (type === 2 || type === 'exchange') {
         console.log(`choose 3 letters to ${type === 2 ? 'put' : 'exchange'}`);
-        const letter1 = await get_aimed_letter(player, 1);
-        const letter2 = await get_aimed_letter(player, 1);
-        const letter3 = await get_aimed_letter(player, 1);
-
-        return [letter1, letter2, letter3];
+        let chosen = []
+        for (let i = 0; i < 3; i++) {
+            const letter = await get_aimed_letter(player, 1);
+            chosen.push(letter);
+        }
+        return chosen;
     }
 }
 
@@ -161,9 +162,11 @@ function put_word(player, word, x) {
     let i = 0;
     for (let letter of word) {
         row[i].push(letter);
+        player.words_played.push(letter);
         i++;
     }
-    player.words_played.push(word);
+    console.log(player.words_played);
+    // player.words_played.push(word);
 }
 
 
