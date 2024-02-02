@@ -116,18 +116,89 @@ async function get_aimed_letter(player, type) {
         return [letter1, letter2, letter3];
     }
 }
-let player1 = {
-    name: 'Player 1',
-    plate: [[['D'], ['O'], ['G'], [], [], [], [], [], []],
-    [[], [], [], [], [], [], [], [], []],
-    [[], [], [], [], [], [], [], [], []],
-    [[], [], [], [], [], [], [], [], []],
-    [[], [], [], [], [], [], [], [], []],
-    [[], [], [], [], [], [], [], [], []],
-    [[], [], [], [], [], [], [], [], []],
-    [[], [], [], [], [], [], [], [], []]],
-    hand: ['E', 'R', 'T', 'S', 'A', 'I'],
-    words_played: []
-};
 
-get_aimed_letter(player1, 2);
+async function rearrange_letters(letters) {
+    let arranged_letters = [];
+    console.log('enter all the letters in the row by your order: ', letters);
+
+    while (letters.length > 0) {
+        const letter = await ask('letter: ');
+        const index = letters.indexOf(letter);
+
+        if (index !== -1) {
+            letters.splice(index, 1);
+            arranged_letters.push(letter);
+        } else {
+            console.log('Invalid letter. Please try again.');
+        }
+    }
+
+    return arranged_letters;
+}
+
+/*
+ * check if the word is valid, return true or false
+ * ! problem with the accent
+ */
+function verify_word(letters) {
+    let word = letters.join('');
+    if (words.includes(word)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
+/**
+ * put the verified word in the plate so there is no verification here
+ * @param {*} player 
+ * @param {*} word verified word
+ * @param {*} x row number
+ */
+function put_word(player, word, x) {
+    let row = player.plate[x];
+    let i = 0;
+    for (let letter of word) {
+        row[i].push(letter);
+        i++;
+    }
+    player.words_played.push(word);
+}
+
+
+/*
+ * display the plate of the player
+ * return: nothing
+ */
+function display_plate(player) {
+    for (let row of player.plate) {
+      let rowStr = '';
+      for (let cell of row) {
+        rowStr += (Array.isArray(cell) && cell.length === 0) ? ' [ ] ' : ' [' + cell + '] ';
+      }
+      console.log(rowStr);
+    }
+  }
+  
+  /*
+   * display the hand of the player
+   * return: nothing
+   */
+  function display_hand(player) {
+    console.log('hand of player ', player.name, ': ', player.hand);
+  }
+  
+  module.exports = {
+    rl,
+    ask,
+    get_random_letters,
+    exchange_with_bag,
+    get_aimed_row,
+    get_aimed_letter,
+    rearrange_letters,
+    verify_word,
+    put_word,
+    display_plate,
+    display_hand
+  };
