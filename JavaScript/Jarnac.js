@@ -60,7 +60,7 @@ function get_aimed_row(player) {
   }
   if (x < 0 || x > 7) {
     console.log('this row is outside the plate, choose again');
-    return get_locat(player);
+    return get_aimed_row(player);
   } else {
     if (player.plate[x][0].length === 0) {
       let aime = x;

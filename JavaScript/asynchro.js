@@ -95,19 +95,39 @@ async function get_aimed_row(player) {
     }
 }
 
+async function get_aimed_letter(player, type) {
+    if (type === 1) {
+        const letter = await ask('choose a letter: ');
 
+        if (player.hand.includes(letter)) {
+            const index = player.hand.indexOf(letter);
+            player.hand.splice(index, 1);
+            return letter;
+        } else {
+            console.log('you do not have this letter in your hand, try again');
+            return get_aimed_letter(player, 1);
+        }
+    } else if (type === 2 || type === 'exchange') {
+        console.log(`choose 3 letters to ${type === 2 ? 'put' : 'exchange'}`);
+        const letter1 = await get_aimed_letter(player, 1);
+        const letter2 = await get_aimed_letter(player, 1);
+        const letter3 = await get_aimed_letter(player, 1);
+
+        return [letter1, letter2, letter3];
+    }
+}
 let player1 = {
-    name : 'Player 1',
-    plate : [[['D'],['O'],['G'],[],[],[],[],[],[]],
-             [[],[],[],[],[],[],[],[],[]],
-             [[],[],[],[],[],[],[],[],[]],
-             [[],[],[],[],[],[],[],[],[]],
-             [[],[],[],[],[],[],[],[],[]],
-             [[],[],[],[],[],[],[],[],[]],
-             [[],[],[],[],[],[],[],[],[]],
-             [[],[],[],[],[],[],[],[],[]]],
-    hand : [],
-    words_played : []
-    };
+    name: 'Player 1',
+    plate: [[['D'], ['O'], ['G'], [], [], [], [], [], []],
+    [[], [], [], [], [], [], [], [], []],
+    [[], [], [], [], [], [], [], [], []],
+    [[], [], [], [], [], [], [], [], []],
+    [[], [], [], [], [], [], [], [], []],
+    [[], [], [], [], [], [], [], [], []],
+    [[], [], [], [], [], [], [], [], []],
+    [[], [], [], [], [], [], [], [], []]],
+    hand: ['E', 'R', 'T', 'S', 'A', 'I'],
+    words_played: []
+};
 
-get_aimed_row(player1);
+get_aimed_letter(player1, 2);
