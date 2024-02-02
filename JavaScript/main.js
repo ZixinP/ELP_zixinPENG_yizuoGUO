@@ -40,7 +40,7 @@ for (let letter of init_hands[1]) {
 }
 console.log('Game start');
 while (!end) {
-    console.log('Turn of player' + turn);
+    console.log('************* Turn of player' + turn +' *************');
     let player = players[turn - 1];
     game.display_plate(player);
     game.display_hand(player);
@@ -63,10 +63,23 @@ while (!end) {
     let row = res[1];
     let letters = game.get_aimed_letter(player,play_type);
     console.log('you chose:', letters)
-    let word = game.rearrange_letters(letters);
-    while (!game.verify_word(word)) {
-        console.log('Invalid word. Please try again.');
+    let word;
+    if (play_type === 1){
         word = game.rearrange_letters(letters);
+        while (!game.verify_word(word)) {
+            console.log('Invalid word. Please try again.');
+            word = game.rearrange_letters(letters);
+        }
+    } else {
+        word = letters;
+        while (!game.verify_word(word)) {
+            console.log('Invalid word. Please try again.');
+            for (let letter of letters) {
+                player.hand.push(letter);
+            }
+            console.log(player.hand);
+            word = game.get_aimed_letter(player,2);
+        }
     }
     game.put_word(player,word,row);
     game.display_plate(player);

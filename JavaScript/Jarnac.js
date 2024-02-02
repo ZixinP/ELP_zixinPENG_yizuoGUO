@@ -51,7 +51,21 @@ function exchange_with_bag(player, letters) {
  */
 function get_aimed_row(player) {
   console.log('choose a row (0-7) to put the letter');
-  let x = parseInt(prompt('x: '));
+  let x = prompt('x: ');
+  if (x === '^C') {
+    console.log('Exit');
+    process.exit();
+  }
+  x = parseInt(x);
+  while (x === NaN) {
+    console.log('Invalid input. Please try again.');
+    x = prompt('x: ');
+    if (x === '^C') {
+      console.log('Exit');
+      process.exit();
+    }
+    x = parseInt(x);
+  }
   if (x < 0 || x > 7) {
     console.log('this row is outside the plate, choose again');
     return get_locat(player);
@@ -62,7 +76,7 @@ function get_aimed_row(player) {
         if (player.plate[i][0].length === 0) { aime = i; }
       }
       console.log('you try to put a letter in an empty row, you have to fill the row from the top');
-      console.log('please choose at least 3 letters in your hand to put in this row');
+      console.log('please choose at least 3 letters in your hand to put in the row ',aime);
       return [2, aime];
     } else {
       console.log('you try to put a letter in a row with letters, please choose a letter in your hand to put in this row');
@@ -79,6 +93,10 @@ function get_aimed_row(player) {
 function get_aimed_letter(player, type) {
   if (type === 1) {
     let letter = prompt('choose a letter: ');
+    if (letter === '^C') {
+      console.log('Exit');
+      process.exit();
+    }
     if (player.hand.includes(letter)) {
       const index = player.hand.indexOf(letter);
       player.hand.splice(index, 1);
@@ -86,7 +104,7 @@ function get_aimed_letter(player, type) {
     } else {
       console.log('you do not have this letter in your hand, try again');
       return get_aimed_letter(player, 1);
-    }
+    } 
   }
   else if (type === 2) {
     console.log('choose 3 letters to put');
@@ -105,9 +123,13 @@ function get_aimed_letter(player, type) {
 function rearrange_letters(letters) {
   let arranged_letters = [];
   console.log('enter all the letters in the row by your order: ', letters);
-  while (letters != []) {
+  while (letters.length > 0) {
     let letter = prompt('letter: ');
     const index = letters.indexOf(letter);
+    if (letter === '^C') {
+      console.log('Exit');
+      process.exit();
+    }
     if (index !== -1) {
       letters.splice(index, 1);
       arranged_letters.push(letter);
