@@ -22,7 +22,7 @@ let player1 = {
     [[], [], [], [], [], [], [], [], []],
     [[], [], [], [], [], [], [], [], []],
     [[], [], [], [], [], [], [], [], []]],
-    hand: [],
+    hand: ['B','O','N','N','E','C'],
     words_played: []
 };
 let player2 = {
@@ -35,7 +35,7 @@ let player2 = {
     [[], [], [], [], [], [], [], [], []],
     [[], [], [], [], [], [], [], [], []],
     [[], [], [], [], [], [], [], [], []]],
-    hand: [],
+    hand: ['C','U','I','T','E','N'],
     words_played: []
 }
 let players = [player1, player2];
@@ -48,12 +48,12 @@ const initHandsPromises = [
 
 Promise.all(initHandsPromises)
     .then(async initHands => {
-        for (let letter of initHands[0]) {
-            player1.hand.push(letter);
-        }
-        for (let letter of initHands[1]) {
-            player2.hand.push(letter);
-        }
+        // for (let letter of initHands[0]) {
+        //     player1.hand.push(letter);
+        // }
+        // for (let letter of initHands[1]) {
+        //     player2.hand.push(letter);
+        // }
         console.log('Game start');
         await first_turn();
         await play_turns();
@@ -72,11 +72,19 @@ async function first_turn() {
 
     let play_type = 2;
     let row = 0;
+    console.log('first turn, you have to put a word with at least 3 letters, enter by order and nothing to stop the input');
     let letters = await game.get_aimed_letter(player, play_type);
     console.log('you chose:', letters);
     let word;
     if (play_type === 1) {
         word = await game.rearrange_letters(player.words_played[row].concat(letters));
+        console.log('word:', word);
+        while (word == ['']) {
+            console.log('choose another letter');
+            letters = await game.get_aimed_letter(player, play_type);
+            console.log('you chose:', letters);
+            word = await game.rearrange_letters(player.words_played[row].concat(letters));
+        } //YOUDIAN WENTI
         while (!game.verify_word(word)) {
             console.log('Invalid word. Please try again.');
             word = await game.rearrange_letters(letters);
@@ -124,6 +132,7 @@ async function play_turns() {
     console.log('you chose:', letters);
     let word;
     if (play_type === 1) {
+        console.log(player.words_played[row].concat(letters))
         word = await game.rearrange_letters(player.words_played[row].concat(letters));
         while (!game.verify_word(word)) {
             console.log('Invalid word. Please try again.');

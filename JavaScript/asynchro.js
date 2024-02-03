@@ -124,10 +124,15 @@ async function get_aimed_letter(player, type) {
 
 async function rearrange_letters(letters) {
     let arranged_letters = [];
-    console.log('enter all the letters in the row by your order: ', letters);
+    console.log('Enter all the letters in the row in your desired order: ', letters);
+    console.log('Enter nothing to go back to the previous step.');
+    const input = await ask('Letters (separated by spaces): ');
+    if (input === '') {
+        return [''];
+    }
+    const inputLetters = input.split(' ');
 
-    while (letters.length > 0) {
-        const letter = await ask('letter: ');
+    for (const letter of inputLetters) {
         const index = letters.indexOf(letter);
 
         if (index !== -1) {
@@ -139,6 +144,7 @@ async function rearrange_letters(letters) {
     }
 
     return arranged_letters;
+
 }
 
 /*
@@ -164,13 +170,14 @@ function verify_word(letters) {
 function put_word(player, word, x) {
     let row = player.plate[x];
     let i = 0;
+    let played = [];
     for (let letter of word) {
         row[i].push(letter);
-        player.words_played.push(letter);
+        played.push(letter);
         i++;
     }
-    console.log(player.words_played);
-    // player.words_played.push(word);
+    player.words_played.push(played);
+
 }
 
 
