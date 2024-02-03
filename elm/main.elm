@@ -1,4 +1,3 @@
-
 module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser exposing (..)
@@ -67,6 +66,7 @@ init _ =
 
 type Msg
   = Initgame Int
+  | Chooseword
   | GotQuote (Result Http.Error (List (List Meaning)))
   | Answer String
   | ShowWord
@@ -94,6 +94,9 @@ update msg model =
         infor_word model index
       )
     
+    Chooseword ->
+      (model, Random.generate Initgame (Random.int 0 999))
+     
     GotQuote result ->
       case result of
         Ok quote ->
@@ -110,10 +113,6 @@ update msg model =
     ShowSynon ->
       ({model | synon = not model.synon}, Cmd.none)
 
-
-chooseword : Cmd Msg
-chooseword = 
-  Random.generate Initgame (Random.int 0 999)
 
     
 infor_word : Model -> Int -> Cmd Msg
@@ -186,35 +185,35 @@ view model =
             [ text "Error in loading the quote."
             , pre[][text "\n"]
             , text ("BadUrl: "++string)
-            , button [ onClick (chooseword()), style "display" "block" ] [text "try again"]
+            , button [ onClick Chooseword, style "display" "block" ] [text "try again"]
             ]
         Http.Timeout ->
           div []
             [ text "Error in loading the quote."
             , pre[][text "\n"]
             , text ("Timeout")
-            , button [ onClick (chooseword()), style "display" "block" ] [text "try again"]
+            , button [ onClick Chooseword, style "display" "block" ] [text "try again"]
             ]
         Http.NetworkError ->
           div []
             [ text "Error in loading the quote."
             , pre[][text "\n"]
             , text ("NetworkError")
-            , button [ onClick (chooseword()), style "display" "block" ] [text "try again"]
+            , button [ onClick Chooseword, style "display" "block" ] [text "try again"]
             ]
         Http.BadStatus int ->
           div []
             [ text "Error in loading the quote."
             , pre[][text "\n"]
             , text ("BadStatus: "++(String.fromInt int))
-            , button [ onClick (chooseword()), style "display" "block" ] [text "try again"]
+            , button [ onClick Chooseword, style "display" "block" ] [text "try again"]
             ]
         Http.BadBody string ->
           div []
             [ text "Error in loading the quote."
             , pre[][text "\n"]
             , text ("BadBody: "++string)
-            , button [ onClick (chooseword()), style "display" "block" ] [text "try again"]
+            , button [ onClick Chooseword, style "display" "block" ] [text "try again"]
             ]
             
     Loading ->
@@ -229,9 +228,9 @@ view model =
       , viewInput "text" "Answer" model.answer Answer
       , checkbox ShowWord "show the answer"
       , div[style "padding-left" "80px"] 
-        [ button [ onClick (chooseword()), style "display" "block"] [text "Start game"]]
+        [ button [ onClick Chooseword, style "display" "block"] [text "Start game"]]
       , div[style "padding-left" "80px"]  
-        [ button [ onClick (chooseword()), style "display" "block" ] [text "More game"]]
+        [ button [ onClick Chooseword, style "display" "block" ] [text "More game"]]
       , div[style "padding-left" "80px"]  
         [ button [ onClick ShowSynon, style "display" "block" ] [text "Synonyms"]]
       ]
