@@ -126,8 +126,12 @@ get_word : List String -> Int -> String
 get_word words nbr = 
   let
     word = getAt nbr words
+    
+    -- wordarray = Array.fromList words --
+    -- word = Array.get nbr wordarray --
+
   in
-    Maybe.withDefault "" word
+    Maybe.withDefault "no word" word
   
   
     
@@ -223,7 +227,7 @@ view model =
       div[style "padding-left" "200px"]
       [ viewTitle model
       , viewSelectedWord model.result model.selectedWord
-      , ol[][ h3[][text "meanings"], getDefinition quote 0 model.result]
+      , ol[][ h3[][text "meanings"], getDefinition quote 0 model.synon]
       , viewValidate model
       , viewInput "text" "Answer" model.answer Answer
       , checkbox ShowWord "show the answer"
@@ -278,7 +282,7 @@ checkbox msg name =
 
 
 getDefinition : (List (List Meaning)) -> Int -> Bool -> Html Msg
-getDefinition quote int result = 
+getDefinition quote int showsyn = 
   let
     array_ListMeaning = fromList(quote)            --list of all meanings
     maybe_ListMeaning = (get 0 array_ListMeaning)
@@ -292,9 +296,9 @@ getDefinition quote int result =
       div[]
       [ ol[][ text meaning.partOfSpeech
             , ol[][ getAllDefinition array_Definition 0 ]
-            , ol[][ showSynon result meaning]
+            , ol[][ showSynon showsyn meaning]
             ]
-      , getDefinition quote (int+1) result
+      , getDefinition quote (int+1) showsyn
       ]
     else
       div[][]
@@ -314,12 +318,11 @@ getAllDefinition array_Definition nbr =
       pre[] [text (Maybe.withDefault "" maybe_Definition)]
 
 showSynon : Bool -> Meaning -> Html Msg
-showSynon result meaning = 
-  if result /= False then
-    pre[][text (String.join ", " (meaning.synonyms) )]
+showSynon showsyn meaning = 
+  if showsyn /= False then
+    pre[][text("Synonyms"), text (String.join ", " (meaning.synonyms) )]
   else
     pre[][]
-
     
 getAt : Int -> List a -> Maybe a
 getAt index list =
