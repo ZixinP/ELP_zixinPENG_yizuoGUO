@@ -96,23 +96,27 @@ async function get_aimed_row(player) {
 }
 
 async function get_aimed_letter(player, type) {
+    let nb_max = player.hand.length;
     if (type === 1) {
         const letter = await ask('choose a letter: ');
-
         if (player.hand.includes(letter)) {
             const index = player.hand.indexOf(letter);
             player.hand.splice(index, 1);
             return letter;
-        } else {
+        } else if (letter === '') {
+            return '';
+        } 
+        else {
             console.log('you do not have this letter in your hand, try again');
             return get_aimed_letter(player, 1);
         }
     } else if (type === 2 || type === 'exchange') {
-        console.log(`choose 3 letters to ${type === 2 ? 'put' : 'exchange'}`);
-        let chosen = []
-        for (let i = 0; i < 3; i++) {
-            const letter = await get_aimed_letter(player, 1);
+        console.log(`choose letters to ${type === 2 ? 'put' : 'exchange'}`);
+        let chosen = [];
+        let letter = await get_aimed_letter(player, 1);
+        while (letter !== '' && chosen.length < nb_max-1) {
             chosen.push(letter);
+            letter = await get_aimed_letter(player, 1);
         }
         return chosen;
     }

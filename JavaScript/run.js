@@ -68,7 +68,7 @@ async function first_turn() {
     let player = players[turn - 1];
     game.display_plate(player);
     game.display_hand(player);
-    console.log('_________________________________________________________');
+    console.log('_____________________________________________________');
 
     let play_type = 2;
     let row = 0;
