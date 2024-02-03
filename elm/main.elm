@@ -222,8 +222,6 @@ view model =
       , viewValidate model
       , viewInput "text" "Answer" model.answer Answer
       , checkbox ShowWord "show the answer" model.showAnswer
-      , div[style "padding-left" "80px"] 
-        [ button [ onClick Chooseword, style "display" "block"] [text "Start game"]]
       , div[style "padding-left" "80px"]  
         [ button [ onClick Chooseword, style "display" "block" ] [text "More game"]]
       , div[style "padding-left" "80px"]  
