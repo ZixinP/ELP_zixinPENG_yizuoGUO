@@ -176,7 +176,7 @@ func abs(x uint8) uint8 {
 }
 
 
-// Version of using goroutine for each pgxel in handle_image function (not tested )
+// Version of using goroutine for each pgxel in handle_image function
 /*
 package image_handle
 
@@ -231,12 +231,12 @@ func handle_image(img image.Image, Parameter int) image.Image {
 		Gdown[i] = make([]uint8, gray.Bounds().Max.Y)
 	}
 
-	var wg_1 sync.WaitGroup
+	wg_1 := sync.WaitGroup
 	for y := 1; y < gray.Bounds().Max.Y-1; y++ {
 		for x := 1; x < gray.Bounds().Max.X-1; x++ {
 			wg_1.Add(1)
 			go func(x, y int , sobel *image.Gray, gxgy_map [][]Tuple) {
-				defer wg.Done()
+				defer wg_1.Done()
 				gx := -gray.GrayAt(x-1, y-1).Y - 2*gray.GrayAt(x-1, y).Y - gray.GrayAt(x-1, y+1).Y +
 					gray.GrayAt(x+1, y-1).Y + 2*gray.GrayAt(x+1, y).Y + gray.GrayAt(x+1, y+1).Y
 				gy := -gray.GrayAt(x-1, y-1).Y - 2*gray.GrayAt(x, y-1).Y - gray.GrayAt(x+1, y-1).Y +
@@ -248,7 +248,7 @@ func handle_image(img image.Image, Parameter int) image.Image {
 	}
 	wg_1.Wait()
 
-	var wg_2 sync.WaitGroup
+	wg_2 := sync.WaitGroup
 	var image_end image.Image
 	for y := 1; y < gray.Bounds().Max.Y-1; y++ {
 		for x := 1; x < gray.Bounds().Max.X-1; x++ {

@@ -19,10 +19,10 @@ type Request struct {
 }
 
 
-// 解码客户端发送的图像数据,返回jpg格式的图像数据和int参数
+// decode the image and intParameter from the client
 func Decode_image(conn net.Conn) (image.Image, int) {
 
-	// 读取客户端发送的数据
+	// create a buffer to store the data received from the client
 	buffer := make([]byte, 1024)
 	var data []byte
     
@@ -40,16 +40,16 @@ func Decode_image(conn net.Conn) (image.Image, int) {
         }
     }
 
-	// 解码 JSON 数据
+	// decode the JSON data to a Request object
 	var request Request
-	err := json.Unmarshal(data, &request) //intParameter在这里以及保存在request中
+	err := json.Unmarshal(data, &request)  
 	if err != nil {
 		fmt.Println("Error decoding JSON:", err)
 		return nil, 0
 	}
 
 
-	// 将 base64 字符串解码为图像数据
+	// decode the base64 strings to image data
 	imageData, err := base64.StdEncoding.DecodeString(request.Image)
 	if err != nil {
 		fmt.Println("Error decoding base64:", err)
@@ -58,7 +58,7 @@ func Decode_image(conn net.Conn) (image.Image, int) {
 
 	fmt.Println("Image data received from client.")
 
-	// 创建一个 image.Image 对象
+	// create an image.Image from the image data
 	img, _, err := image.Decode(strings.NewReader(string(imageData)))
 	if err != nil {
 		fmt.Println("Error decoding image:", err)
@@ -69,24 +69,24 @@ func Decode_image(conn net.Conn) (image.Image, int) {
 }
 
 
-func Encode_image(image_jpg image.Image) (string,error){     // 将图像数据编码为 base64 字符串
+func Encode_image(image_obj image.Image) (string,error){     // encode image.Image to base64 string
 	var buf bytes.Buffer
 
-	// 将图片编码为 JPG 格式
-	err := jpeg.Encode(&buf, image_jpg, nil)
+	// encode the image to JPEG format
+	err := jpeg.Encode(&buf, image_obj, nil)
 	if err != nil {
 		fmt.Println("Error encoding image:", err)
 		return "", err
 	}
 
-	// 将编码后的字节切片转为 base64 编码的字符串
+	// convert the image from bytes to base64
 	base64String := base64.StdEncoding.EncodeToString(buf.Bytes())
 
 	return base64String, nil
 }
 	
 
-func LoadImage(imagePath string) (image.Image, error) {   // 读取图片文件并将其转为 image.Image
+func LoadImage(imagePath string) (image.Image, error) {   // read image from file and return image.Image
 	file, err := os.Open(imagePath)
 	if err != nil {
 		return nil, err

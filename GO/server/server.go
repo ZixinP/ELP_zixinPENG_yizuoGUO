@@ -39,7 +39,6 @@ func (e *Environment) createConnection(conn net.Conn) (*Connection, error) {
 		return nil, fmt.Errorf("exceeded maximum allowed connections")
 	}
 
-	// 更新活跃连接数
 	e.activeConnections++
 
 	return &Connection{Conn: conn}, nil
@@ -49,27 +48,24 @@ func (e *Environment) closeConnection(connection *Connection) {
 	e.connectionMutex.Lock()
 	defer e.connectionMutex.Unlock()
 
-	// 关闭连接
 	connection.Conn.Close()
 
-	// 更新活跃连接数
 	e.activeConnections--
 }
 
 
 	
 
-
-func image_process(image_init image.Image, index int) image.Image { // 图像处理函数
+// fonction for image processing
+func image_process(image_init image.Image, index int) image.Image {  
 	var wg sync.WaitGroup
 
-	ch := make(chan image.Image) // 创建一个无缓冲的通道
-	var n int // n 是图片处理需要的总步数，后面改
+	ch := make(chan image.Image) // create a channel to store the image data
+	var n int  // n is the number of total steps in the image processing
 
-	// 循环创建goroutine
 	for i := 1; i <= n; i++ {
 		wg.Add(1)
-		go func(step int) {
+		go func(step int) {   // create a goroutine for each step
 			defer wg.Done()
 			img := <-ch
 			result := processStep(step, index, img)
@@ -77,23 +73,22 @@ func image_process(image_init image.Image, index int) image.Image { // 图像处
 		}(i)
 	}
 
-	// 初始化第一个输入并开始循环
-
+	// initialize the channel with the initial image data
 	ch <- image_init
 
-	// 等待所有 goroutine 执行完毕
 	wg.Wait()
 
-	// 最终结果
+	// get the final result from the channel
 	finalResult := <-ch
 
 	return finalResult
 }
 
+// for now we only have one step for handling the image: edge detection
 func processStep(step, input int, img image.Image) image.Image {
 	switch step {
 	case 1:
-		return hdl.handle_image(img, input)
+		return hdl.handle_image(img, input)   // call the handle_image function from the handle package
 	case 2:
 		return nil
 	case 3:
@@ -105,28 +100,28 @@ func processStep(step, input int, img image.Image) image.Image {
 }
 
 
-func handleConnection(conn net.Conn) { // 处理连接
+func handleConnection(conn net.Conn) { 
 
-	image, index := fct.Decode_image(conn) // 解码客户端发送的图像数据
+	image, index := fct.Decode_image(conn) 
 
-	image_end := image_process(image, index) // 图像处理函数
+	image_end := image_process(image, index) 
 
-	image_strings,err:=fct.Encode_image(image_end) // 将图像数据编码为 base64 字符串
+	image_strings,err:=fct.Encode_image(image_end) 
 
 	if err != nil {
 		fmt.Println("Error encoding image:", err)
 		return
 	}
 
-	conn.Write([]byte(image_strings)) // 将图像数据发送给客户端
+	conn.Write([]byte(image_strings)) // send the image data back to the client
 
 }
 
 func main() {
-	//  创建一个环境结构体，最多可以容纳10个连接
+	//  create a new environment with a maximum of 5 connections
 	env := NewEnvironment(5)
 	
-	listener, err := net.Listen("tcp", ":8080") //监听8080端口
+	listener, err := net.Listen("tcp", ":8080") // listen on port 8080
 	if err != nil {
 		fmt.Println("Error listening:", err)
 		return
@@ -145,14 +140,13 @@ func main() {
 			continue
 		}
 
-		connection, err := env.createConnection(conn) // 创建连接
+		connection, err := env.createConnection(conn) // create a new connection
 		if err != nil {
 			fmt.Println("Error creating connection:", err)
 			return
 		}
-        defer env.closeConnection(connection) // 关闭连接
+        defer env.closeConnection(connection) // close the connection when the function returns
 
-		// 在处理连接的过程中，将 Connection 对象传递给其他函数
 		handleConnection(connection.Conn)
 
 	}
@@ -163,15 +157,15 @@ func main() {
 
 
 
-
+// an idea for using a connection pool,but it's not necessary for this project
 /*
-type Environment struct { // 环境结构体，为了限制连接池的大小
+type Environment struct {     // struct for the environment
 	pool    *sync.Pool
 	maxSize int
 	mu      sync.Mutex
 }
 
-type Connection struct { // 连接结构体
+type Connection struct {      // struct for the connection
 	conn net.Conn
 }
 
@@ -187,19 +181,19 @@ func NewEnvironment(Maxsize int) *Environment {
 }
 
 
-func (e *Environment) getConnection() *Connection { // 从连接池中获取连接
-	e.mu.Lock() //执行函数时加锁，为了保证在多个goroutine中不会出现竞争条件
+func (e *Environment) getConnection() *Connection {     
+	e.mu.Lock()         // apply a lock to the environment to ensure that only one goroutine can access the environment at a time
 	defer e.mu.Unlock()
 
-	conn := e.pool.Get() //从连接池中获取连接
-	return conn.(*Connection) //将interface{}类型转换为*Connection类型
+	conn := e.pool.Get() 
+	return conn.(*Connection)    // convert the interface{} type to *Connection type
 }
 
-func (e *Environment) releaseConnection(conn *Connection) { // 表示这个函数是属于Environment类型的方法，用于释放连接到连接池
+func (e *Environment) releaseConnection(conn *Connection) {       // release the connection
 	e.mu.Lock()
 	defer e.mu.Unlock()
 
-	if e.pool == nil { //如果还没有初始化连接池的本地池。在这种情况下，使用 new(sync.Pool) 初始化一个新的 sync.Pool 对象。
+	if e.pool == nil {             //if the pool is not initialized, create a new pool
 		e.pool = new(sync.Pool)
 	}
 
