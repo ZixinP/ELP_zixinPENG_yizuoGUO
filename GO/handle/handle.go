@@ -176,7 +176,7 @@ func abs(x uint8) uint8 {
 }
 
 
-
+// Version of using goroutine for each pgxel in handle_image function (not tested )
 /*
 package image_handle
 
