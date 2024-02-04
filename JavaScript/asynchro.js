@@ -110,11 +110,11 @@ async function get_aimed_letter(player, type) {
             return get_aimed_letter(player, 'exchange');
         }
     }
-    else if (!Object.entries(countLetters(letters)).every(([letter, count]) => {
+    if (!Object.entries(countLetters(letters)).every(([letter, count]) => {
         return countLetters(player.hand)[letter] >= count;
     })) {
         console.log(`You do not have the letter in your hand`);
-        return get_aimed_letter(player, 'put');
+        return get_aimed_letter(player, 'exchange');
     }
     for (let letter of letters) {    
         player.hand.splice(player.hand.indexOf(letter), 1);

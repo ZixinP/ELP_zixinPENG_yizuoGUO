@@ -40,7 +40,6 @@ let player2 = {
 }
 let players = [player1, player2];
 
-// 异步获取初始手牌
 const initHandsPromises = [
     game.get_random_letters(true),
     game.get_random_letters(true)
@@ -77,24 +76,10 @@ async function first_turn() {
     if (letters === 'PASS') {
         console.log('you passed your turn');
         turn = 2;
-        await play_turns();
+        return play_turns();
     }
     console.log('you chose:', letters);
     let word;
-    if (play_type === 1) {
-        word = await game.rearrange_letters(player.words_played[row].concat(letters));
-        console.log('word:', word);
-        while (word == ['']) {
-            console.log('choose another letter');
-            letters = await game.get_aimed_letter(player, play_type);
-            console.log('you chose:', letters);
-            word = await game.rearrange_letters(player.words_played[row].concat(letters));
-        } //YOUDIAN WENTI
-        while (!game.verify_word(word)) {
-            console.log('Invalid word. Please try again.');
-            word = await game.rearrange_letters(letters);
-        }
-    } else {
         word = letters;
         while (!game.verify_word(word)) {
             console.log('Invalid word. Please try again.');
@@ -102,9 +87,15 @@ async function first_turn() {
                 player.hand.push(letter);
             }
             console.log(player.hand);
-            word = await game.get_aimed_letter(player, 'put');
-        }
+            wait = await game.get_aimed_letter(player, 'put');
+            if (wait === 'PASS') {
+                console.log('you passed your turn');
+                turn = 2;
+                return play_turns();
+            }
+            word - wait;
     }
+    
     game.put_word(player, word, row);
     player.hand = player.hand.concat(game.get_random_letters(false));
     game.display_plate(player);
@@ -126,16 +117,20 @@ async function play_turns() {
     }
     if (action === '1') {
         let to_exchange = await game.get_aimed_letter(player, 'exchange');
-        console.log(to_exchange);
+        if (to_exchange === 'PASS') {
+            console.log('you passed your turn');
+            turn = (turn === 1) ? 2 : 1;
+            await play_turns();
+        }
         game.exchange_with_bag(player, to_exchange);
     }
     game.display_plate(player);
     game.display_hand(player);
     let res = await game.get_aimed_row(player);
-    let play_type = res[0] === 1 ? 'exchange' : 'put';
+    let play_type = res[0];
     let row = res[1];
-    let letters = await game.get_aimed_letter(player, play_type);
-    if (letters === 'pass') {
+    let letters = await game.get_aimed_letter(player, 'put');
+    if (letters === 'PASS') {
         console.log('you passed your turn');
         turn = (turn === 1) ? 2 : 1;
         await play_turns();
@@ -169,3 +164,7 @@ async function play_turns() {
         await play_turns();
     }
 }
+
+// async function jarnac(){
+//     let 
+// }
