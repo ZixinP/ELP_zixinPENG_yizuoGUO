@@ -1,15 +1,15 @@
 package fonctions
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"image"
 	"image/jpeg"
+	"net"
 	"os"
 	"strings"
-	"bytes"
-	"net"
 )
 
 
@@ -21,7 +21,6 @@ type Request struct {
 
 // 解码客户端发送的图像数据,返回jpg格式的图像数据和int参数
 func Decode_image(conn net.Conn) (image.Image, int) {
-	defer conn.Close()
 
 	// 读取客户端发送的数据
 	buffer := make([]byte, 1024)
@@ -66,44 +65,17 @@ func Decode_image(conn net.Conn) (image.Image, int) {
 		return nil, 0
 	}
 
-	// 将 image.Image 对象保存为 JPG 格式的文件
-	err = SaveAsJPG(img, "output.jpg", 100) // 第三个参数是 JPG 压缩质量，范围从 0 到 100
-	if err != nil {
-		fmt.Println("Error saving image as JPG:", err)
-		return nil, 0
-	}
-
-	fmt.Println("Image saved as JPG.")
-
 	return img, request.IntParameter
 }
 
-// 将 image.Image 对象保存为 JPG 格式的文件
-func SaveAsJPG(img image.Image, filename string, quality int) error {
-	file, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
 
-	options := &jpeg.Options{
-		Quality: quality,
-	}
-
-	err = jpeg.Encode(file, img, options)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func Encode_image(image_jpg image.Image) (string,error){ // 将图像数据编码为 base64 字符串
+func Encode_image(image_jpg image.Image) (string,error){     // 将图像数据编码为 base64 字符串
 	var buf bytes.Buffer
 
 	// 将图片编码为 JPG 格式
 	err := jpeg.Encode(&buf, image_jpg, nil)
 	if err != nil {
+		fmt.Println("Error encoding image:", err)
 		return "", err
 	}
 
@@ -114,7 +86,7 @@ func Encode_image(image_jpg image.Image) (string,error){ // 将图像数据编�
 }
 	
 
-func LoadImage(imagePath string) (image.Image, error) {
+func LoadImage(imagePath string) (image.Image, error) {   // 读取图片文件并将其转为 image.Image
 	file, err := os.Open(imagePath)
 	if err != nil {
 		return nil, err

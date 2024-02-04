@@ -6,7 +6,8 @@ import (
 	"image"
 	"net"
 	"sync"
-	fct "fonctions"
+	fct "../fonctions"
+	hdl "../handle"
 )
 
 type Request struct {
@@ -59,10 +60,10 @@ func (e *Environment) closeConnection(connection *Connection) {
 	
 
 
-func image_process(image_jpg image.Image, index int) image.Image { // 图像处理函数
+func image_process(image_init image.Image, index int) image.Image { // 图像处理函数
 	var wg sync.WaitGroup
 
-	ch := make(chan image.Image)
+	ch := make(chan image.Image) // 创建一个无缓冲的通道
 	var n int // n 是图片处理需要的总步数，后面改
 
 	// 循环创建goroutine
@@ -70,14 +71,15 @@ func image_process(image_jpg image.Image, index int) image.Image { // 图像处�
 		wg.Add(1)
 		go func(step int) {
 			defer wg.Done()
-			result := processStep(step, index, image_jpg)
+			img := <-ch
+			result := processStep(step, index, img)
 			ch <- result
 		}(i)
 	}
 
 	// 初始化第一个输入并开始循环
 
-	ch <- image_jpg
+	ch <- image_init
 
 	// 等待所有 goroutine 执行完毕
 	wg.Wait()
@@ -88,17 +90,15 @@ func image_process(image_jpg image.Image, index int) image.Image { // 图像处�
 	return finalResult
 }
 
-func processStep(step, input int, input_jpg image.Image) image.Image {
+func processStep(step, input int, img image.Image) image.Image {
 	switch step {
 	case 1:
-		//第一步的函数
+		return hdl.handle_image(img, input)
 	case 2:
-		//第二步
+		return nil
 	case 3:
-
-	case 4:
-
-		//总共n种情况
+		return nil
+	// ...	
 	default:
 		return nil
 	}
@@ -107,9 +107,9 @@ func processStep(step, input int, input_jpg image.Image) image.Image {
 
 func handleConnection(conn net.Conn) { // 处理连接
 
-	image_jpg, index := fct.Decode_image(conn) // 解码客户端发送的图像数据
+	image, index := fct.Decode_image(conn) // 解码客户端发送的图像数据
 
-	image_end := image_process(image_jpg, index) // 图像处理函数
+	image_end := image_process(image, index) // 图像处理函数
 
 	image_strings,err:=fct.Encode_image(image_end) // 将图像数据编码为 base64 字符串
 
@@ -119,6 +119,7 @@ func handleConnection(conn net.Conn) { // 处理连接
 	}
 
 	conn.Write([]byte(image_strings)) // 将图像数据发送给客户端
+
 }
 
 func main() {
@@ -143,7 +144,7 @@ func main() {
 			fmt.Println("Error accepting connection:", err)
 			continue
 		}
-        
+
 		connection, err := env.createConnection(conn) // 创建连接
 		if err != nil {
 			fmt.Println("Error creating connection:", err)
@@ -156,6 +157,8 @@ func main() {
 
 	}
 }
+
+
 
 
 
