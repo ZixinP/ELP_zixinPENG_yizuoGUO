@@ -96,30 +96,41 @@ async function get_aimed_row(player) {
 }
 
 async function get_aimed_letter(player, type) {
-    let nb_max = player.hand.length;
-    if (type === 1) {
-        const letter = await ask('choose a letter: ');
-        if (player.hand.includes(letter)) {
-            const index = player.hand.indexOf(letter);
-            player.hand.splice(index, 1);
-            return letter;
-        } else if (letter === '') {
-            return '';
-        } 
-        else {
-            console.log('you do not have this letter in your hand, try again');
-            return get_aimed_letter(player, 1);
-        }
-    } else if (type === 2 || type === 'exchange') {
-        console.log(`choose letters to ${type === 2 ? 'put' : 'exchange'}`);
-        let chosen = [];
-        let letter = await get_aimed_letter(player, 1);
-        while (letter !== '' && chosen.length < nb_max-1) {
-            chosen.push(letter);
-            letter = await get_aimed_letter(player, 1);
-        }
-        return chosen;
+    let letters = [];
+    let answer = await ask(`Which letters do you want to ${type} ? `);
+    for (let letter of answer) {
+        letters.push(letter.toUpperCase());
     }
+    if (['P','A','S','S'].every(letter => letters.includes(letter))) {
+        return 'PASS';
+    }
+    if (type ==='exchange') {
+        if (letters.length !== 3) {
+            console.log('You must exchange 3 letters');
+            return get_aimed_letter(player, 'exchange');
+        }
+    }
+    else if (!Object.entries(countLetters(letters)).every(([letter, count]) => {
+        return countLetters(player.hand)[letter] >= count;
+    })) {
+        console.log(`You do not have the letter in your hand`);
+        return get_aimed_letter(player, 'put');
+    }
+    for (let letter of letters) {    
+        player.hand.splice(player.hand.indexOf(letter), 1);
+    }    
+    return letters;
+}
+function countLetters(word) {
+    const count = {};
+    for (let i = 0; i < word.length; i++) {
+        const letter = word[i];
+        if (!count[letter]) {
+            count[letter] = 0;
+        }
+        count[letter]++;
+    }
+    return count;
 }
 
 async function rearrange_letters(letters) {

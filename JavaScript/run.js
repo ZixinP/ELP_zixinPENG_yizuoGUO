@@ -70,10 +70,15 @@ async function first_turn() {
     game.display_hand(player);
     console.log('_____________________________________________________');
 
-    let play_type = 2;
+    let play_type = 'put';
     let row = 0;
-    console.log('first turn, you have to put a word with at least 3 letters, enter by order and nothing to stop the input');
+    console.log('first turn, you have to put a word with at least 3 letters, enter "pass" if you cannot');
     let letters = await game.get_aimed_letter(player, play_type);
+    if (letters === 'PASS') {
+        console.log('you passed your turn');
+        turn = 2;
+        await play_turns();
+    }
     console.log('you chose:', letters);
     let word;
     if (play_type === 1) {
@@ -97,13 +102,14 @@ async function first_turn() {
                 player.hand.push(letter);
             }
             console.log(player.hand);
-            word = await game.get_aimed_letter(player, 2);
+            word = await game.get_aimed_letter(player, 'put');
         }
     }
     game.put_word(player, word, row);
+    player.hand = player.hand.concat(game.get_random_letters(false));
     game.display_plate(player);
     game.display_hand(player);
-    turn = 2;
+    turn = 1;
 }
 
 
@@ -126,9 +132,14 @@ async function play_turns() {
     game.display_plate(player);
     game.display_hand(player);
     let res = await game.get_aimed_row(player);
-    let play_type = res[0];
+    let play_type = res[0] === 1 ? 'exchange' : 'put';
     let row = res[1];
     let letters = await game.get_aimed_letter(player, play_type);
+    if (letters === 'pass') {
+        console.log('you passed your turn');
+        turn = (turn === 1) ? 2 : 1;
+        await play_turns();
+    }
     console.log('you chose:', letters);
     let word;
     if (play_type === 1) {
@@ -146,13 +157,14 @@ async function play_turns() {
                 player.hand.push(letter);
             }
             console.log(player.hand);
-            word = await game.get_aimed_letter(player, 2);
+            word = await game.get_aimed_letter(player, 'put');
         }
     }
     game.put_word(player, word, row);
+    player.hand = player.hand.concat(game.get_random_letters(false));
     game.display_plate(player);
     game.display_hand(player);
-    turn = (turn === 1) ? 2 : 1;
+    // turn = (turn === 1) ? 2 : 1;
     if (!end) {
         await play_turns();
     }
