@@ -90,12 +90,12 @@ func processStep(step, input int, img image.Image) image.Image {
 	case 1:
 		return hdl.handle_image(img, input)   // call the handle_image function from the handle package
 	case 2:
-		return nil
+		return img
 	case 3:
-		return nil
+		return img
 	// ...	
 	default:
-		return nil
+		return img
 	}
 }
 
